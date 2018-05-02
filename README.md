@@ -1,4 +1,4 @@
-This project is a sample of implementation of Loebner Prize Protocol 2 ([https://github.com/jhudsy/LoebnerPrizeProtocol]) in C++.
+This project is a sample of implementation of Loebner Prize Protocol 2 ( https://github.com/jhudsy/LoebnerPrizeProtocol ) in C++.
 
 # Getting Started
 Download the project and compile it with a C++ compilator on Windows (SEVEN minimum). This project have ben tested with Visual Studio Express, but there is nothing specific to a compilator.
