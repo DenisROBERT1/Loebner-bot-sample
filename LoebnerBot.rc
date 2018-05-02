@@ -1,0 +1,124 @@
+//Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE 9, 1
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+
+// TODO 1 : Change this icon to personalise your bot
+
+IDI_MAINICON			      ICON         "LoebnerBot.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+// TODO 2 : Change TITLE1 and TITLE2
+
+IDD_MAINFORMBOX DIALOGEX 100, 80, 270, 174
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Caption"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    ICON            IDI_MAINICON,IDC_STATIC,14,14,24,24
+    CTEXT           "Loebner interface for bot",IDC_TITLE1,44,14,220,8,SS_NOPREFIX
+    CTEXT           "By John Doe",IDC_TITLE2,44,26,220,8
+    LTEXT           "Status:",IDC_STATIC,4,46,40,8,SS_NOPREFIX
+    LTEXT		        "Enter parameters and click start",IDC_STATUS,56,46,200,8
+    LTEXT           "Name:",IDC_STATIC,4,66,40,8,SS_NOPREFIX
+    EDITTEXT				IDC_NAME,56,64,120,12,ES_AUTOHSCROLL
+    LTEXT           "Secret:",IDC_STATIC,4,86,40,8,SS_NOPREFIX
+    EDITTEXT				IDC_SECRET,56,84,120,12,ES_AUTOHSCROLL
+    LTEXT           "IP:",IDC_STATIC,4,106,40,8,SS_NOPREFIX
+    EDITTEXT				IDC_IP,56,104,120,12,ES_AUTOHSCROLL
+    LTEXT           "Port:",IDC_STATIC,4,126,40,8,SS_NOPREFIX
+    EDITTEXT				IDC_PORT,56,124,120,12,ES_AUTOHSCROLL | ES_NUMBER
+    DEFPUSHBUTTON   "Start",IDC_START,50,152,50,14,WS_GROUP
+    PUSHBUTTON      "Stop",IDC_STOP,110,152,50,14,WS_GROUP | WS_DISABLED
+    PUSHBUTTON			"Quit",IDCANCEL,170,152,50,14,WS_GROUP
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_MAINFORMBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 163
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 55
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+1 TEXTINCLUDE
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE
+BEGIN
+	"#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
