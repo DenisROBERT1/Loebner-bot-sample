@@ -48,9 +48,9 @@ void JSON_release(JSON_VALUE &JSON_Value);
 int EscapeString(const char *szIn, char *szOut, int SizeOut);
 int UnescapeString(const char *szIn, char *szOut, int SizeOut);
 
-void CALLBACK Loebner_OnError(char *szErrorMsg);
-void CALLBACK Loebner_OnDisconnect(char *szReason);
-void CALLBACK Loebner_OnMessage(char *szMessage);
+void CALLBACK Loebner_OnError(const char *szErrorMsg);
+void CALLBACK Loebner_OnDisconnect(const char *szReason);
+void CALLBACK Loebner_OnMessage(const char *szMessage);
 
 
 // ----------------------------------------------------------------------------
@@ -160,18 +160,18 @@ void Loebner_SendMessage(const char *szLine) {
 }
 
 // ----------------------------------------------------------------------------
-void CALLBACK Loebner_OnError(char *szErrorMsg) {
+void CALLBACK Loebner_OnError(const char *szErrorMsg) {
 	MessageBox(hWndTop, szErrorMsg, "Web Socket Error", MB_OK | MB_ICONSTOP);
 }
 
 // ----------------------------------------------------------------------------
-void CALLBACK Loebner_OnDisconnect(char *szReason) {
+void CALLBACK Loebner_OnDisconnect(const char *szReason) {
 	MessageBox(hWndTop, szReason, "Web Socket deconnection", MB_OK | MB_ICONSTOP);
 	if (Li_OnDisconnect != NULL) Li_OnDisconnect(szReason);
 }
 
 // ----------------------------------------------------------------------------
-void CALLBACK Loebner_OnMessage(char *szMessage) {
+void CALLBACK Loebner_OnMessage(const char *szMessage) {
 	JSON_VALUE Data;
 	JSON_VALUE Msg;
 	JSON_VALUE Partners;
@@ -268,7 +268,7 @@ char *JSON_stringify(JSON_TYPE Json_Type, const char *szArg1, ...) {
 	LenNeeded = 3; // length of SepBeg + SepEnd + ending zero
 	szArg = &szArg1;
 	while (*szArg) {
-		LenNeeded += strlen(*szArg) * 2 + 3;  // * 2 because of escape, 3 = Quotes and separator 
+		LenNeeded += strlen(*szArg) * 2 + 3;  // * 2 because of escape, 3 = Quotes and separator
 		szArg += 1;
 	}
 

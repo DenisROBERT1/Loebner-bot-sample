@@ -9,8 +9,8 @@
 typedef void (CALLBACK *LI_ONNEWROUND)(void);
 typedef void (CALLBACK *LI_ONSTARTROUND)(void);
 typedef void (CALLBACK *LI_ONENDROUND)(void);
-typedef void (CALLBACK *LI_ONMESSAGE)(char *);
-typedef void (CALLBACK *LI_ONDISCONNECT)(char *);
+typedef void (CALLBACK *LI_ONMESSAGE)(const char *);
+typedef void (CALLBACK *LI_ONDISCONNECT)(const char *);
 
 #define MAX_JSON_VALUES 12   // Maximum number of values in a JSON string
 #define MAX_LEN_NAME 50   // Maximum length of names (bots, judges and confederates)
@@ -18,7 +18,7 @@ typedef void (CALLBACK *LI_ONDISCONNECT)(char *);
 enum JSON_TYPE {
 	json_list,
 	json_map
-} ;
+};
 
 //-----------------------FUNCTIONS PROTOTYPES--------------------------
 

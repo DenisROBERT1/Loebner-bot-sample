@@ -50,10 +50,10 @@ INT_PTR CALLBACK MainForm(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	  hWndTop = hDlg;
 		Loebner_Initialisation(hDlg, OnNewRound, OnStartRound, OnEndRound, OnMessage, OnDisconnect);
 		SetClassLong(hDlg, GCL_HICON, (LONG) LoadIcon(HInstance, MAKEINTRESOURCE(IDI_MAINICON)));
-		SetWindowText(hDlg, "Loebner interface for bot"); 
-		SetDlgItemText(hDlg, IDC_NAME, "ai0"); 
-		SetDlgItemText(hDlg, IDC_SECRET, "abc123"); 
-		SetDlgItemText(hDlg, IDC_IP, "127.0.0.1"); 
+		SetWindowText(hDlg, "Loebner interface for bot");
+		SetDlgItemText(hDlg, IDC_NAME, "ai0");
+		SetDlgItemText(hDlg, IDC_SECRET, "abc123");
+		SetDlgItemText(hDlg, IDC_IP, "127.0.0.1");
 		SetDlgItemInt(hDlg, IDC_PORT, 8080, FALSE);
 		return (INT_PTR) TRUE;
 
@@ -80,7 +80,7 @@ INT_PTR CALLBACK MainForm(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 				}
 				break;
 			case IDC_STOP:
-				SetDlgItemText(hDlg, IDC_STATUS, "Enter parameters and click start"); 
+				SetDlgItemText(hDlg, IDC_STATUS, "Enter parameters and click start");
 				if (Loebner_Stop()) {
 					EnableWindow(GetDlgItem(hDlg, IDC_NAME), TRUE);
 					EnableWindow(GetDlgItem(hDlg, IDC_SECRET), TRUE);
@@ -122,7 +122,7 @@ void CALLBACK OnEndRound(void) {
 }
 
 //---------------------------------------------------------------------------
-void CALLBACK OnMessage(char *szMessage) {
+void CALLBACK OnMessage(const char *szMessage) {
 	// TODO 5 : Implement a strong AGI and insert it here
 	char *szResponse;
 
@@ -133,7 +133,7 @@ void CALLBACK OnMessage(char *szMessage) {
 }
 
 //---------------------------------------------------------------------------
-void CALLBACK OnDisconnect(char *szReason) {
+void CALLBACK OnDisconnect(const char *szReason) {
 	EnableWindow(GetDlgItem(hWndTop, IDC_NAME), TRUE);
 	EnableWindow(GetDlgItem(hWndTop, IDC_SECRET), TRUE);
 	EnableWindow(GetDlgItem(hWndTop, IDC_IP), TRUE);

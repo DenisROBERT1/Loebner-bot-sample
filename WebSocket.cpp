@@ -6,6 +6,7 @@
 #define _WIN32_WINNT 0x0600
 #endif // _WIN32_WINNT < 0x0600
 
+#include <stdio.h>
 #include <winsock2.h>
 
 #include <windows.h>
@@ -37,9 +38,9 @@
 char szLogFile[MAX_PATH];
 
 // Cryptographics datas
-HCRYPTPROV hCryptProv = NULL;
-HCRYPTHASH hCryptHash = NULL;
-HCRYPTKEY hCryptKey = NULL;
+HCRYPTPROV hCryptProv = (HCRYPTPROV) NULL;
+HCRYPTHASH hCryptHash = (HCRYPTHASH) NULL;
+HCRYPTKEY hCryptKey = (HCRYPTKEY) NULL;
 
 // Socket
 WSADATA WSAData;
@@ -53,20 +54,20 @@ bool bEventRead;
 bool bEventConnect;
 bool bConnected;
 
-char *RequestGET = NULL;
-char *RequestAccept = NULL;
-char *RequestAccept_Language = NULL;
-char *RequestAccept_Encoding = NULL;
-char *RequestOrigin = NULL;
-char *RequestSec_WebSocket_Key = NULL;
-char *RequestConnection = NULL;
-char *RequestUpgrade = NULL;
-char *RequestSec_WebSocket_Version = NULL;
-char *RequestUser_Agent = NULL;
-char *RequestHost = NULL;
-char *RequestDNT = NULL;
-char *RequestCache_Control = NULL;
-char *RequestCookie = NULL;
+const char *RequestGET = NULL;
+const char *RequestAccept = NULL;
+const char *RequestAccept_Language = NULL;
+const char *RequestAccept_Encoding = NULL;
+const char *RequestOrigin = NULL;
+const char *RequestSec_WebSocket_Key = NULL;
+const char *RequestConnection = NULL;
+const char *RequestUpgrade = NULL;
+const char *RequestSec_WebSocket_Version = NULL;
+const char *RequestUser_Agent = NULL;
+const char *RequestHost = NULL;
+const char *RequestDNT = NULL;
+const char *RequestCache_Control = NULL;
+const char *RequestCookie = NULL;
 
 char *ReturnContent_Type = NULL;
 char *ReturnContent_Length = NULL;
@@ -102,14 +103,14 @@ bool SockIOResponse(char *szFrame);
 bool SockIOEncode(const char *szAppData, OPCODE OpCode, bool Fin, bool RSV1, bool RSV2, bool RSV3, bool Masked, int *Len, char *szFrame);
 bool SockIODecode(const char *szFrame, OPCODE *OpCode, bool *Fin, bool *RSV1, bool *RSV2, bool *RSV3, bool *Masked, int *Len, char *szAppData);
 void DisplayError(const char *szFunction, int LastError);
-void DisplayError(const char *szFunction, char *szError);
+void DisplayError(const char *szFunction, const char *szError);
 LRESULT FAR PASCAL WndSocketProc(HWND Handle, UINT Message, WPARAM wParam, LPARAM lParam);
 int SendBuf(const void *Buf, int Count);
 int ReceiveBuf(void *Buf, int Count);
 bool Trace(const void *Buf, int Count, bool bClient);
 bool Base64Encode(const BYTE *BufIn, DWORD SizeIn, char *BufOut, DWORD *dwOut);
 bool Base64Decode(const char *BufIn, DWORD SizeIn, BYTE *BufOut, DWORD *dwOut);
-char *CloseReason(int Reason);
+const char *CloseReason(int Reason);
 LPSTR lstrtok(LPSTR FAR * lpNext, char delim);
 char *TimeStamp();
 
@@ -237,7 +238,7 @@ bool WebSocket_Connect(const char *szAddress, int Port) {
 	    return false;
     }
   }
-	
+
 	// Waiting for message UM_MESSAGE FD_CONNECT (else SocketDistant is not valued)
 	bEventConnect = false;
 	while (!bEventConnect) {
@@ -306,7 +307,7 @@ bool WebSocket_Send(OPCODE OpCode, const char *szMessage) {
 // ----------------------------------------------------------------------------
 bool WebSocket_Ping() {
 	char szPing[30];
-	
+
 	strcpy_s(szPing, 20, TimeStamp());
 	WebSocket_Send(oc_text, "2");
 
@@ -373,7 +374,7 @@ bool OnConnect() {
 	RequestCache_Control = "no-cache";
 	RequestCookie = Cookies;
 	if (!HTTPRequest()) return false;
-	if (ReturnSec_WebSocket_Accept == NULL) return false; 
+	if (ReturnSec_WebSocket_Accept == NULL) return false;
 
 	strcat_s(szWebSocketKeyBase64, 61, "258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
 
@@ -523,7 +524,7 @@ bool HTTPRequest() {
 		sprintf_s(&szFrame[i], MaxLen - i, "Cookie: %s\n", RequestCookie);
 		i = strlen(szFrame);
 	}
-	sprintf_s(&szFrame[i], MaxLen - i, "\n");
+	strcpy_s(&szFrame[i], MaxLen - i, "\n");
 
 	SendBuf(szFrame, strlen(szFrame));
 	Trace(szFrame, strlen(szFrame), true);
@@ -625,7 +626,7 @@ bool HTTPResponse(char *szFrame) {
 		}
 
 		lp2 = lstrtok(&lp, '\n');
-		
+
 		// Deleting end carriage returns
 		i = strlen(lp2) - 1;
 		while (i >= 0 && lp2[i] == '\r') lp2[i--] = '\0';
@@ -936,7 +937,7 @@ bool Base64Decode(const char *BufIn, DWORD SizeIn, BYTE *BufOut, DWORD *dwOut) {
 }
 
 //---------------------------------------------------------------------------
-char *CloseReason(int Reason) {
+const char *CloseReason(int Reason) {
 	switch (Reason) {
 	case 1000:
 		return "1000 Normal closure";
@@ -1001,7 +1002,7 @@ char *TimeStamp() {
 	char c;
 	int Len;
 
-	
+
 	time(&Now);
 	i = 0;
 	while (Now) {
@@ -1043,10 +1044,10 @@ void DisplayError(const char *szFunction, int LastError) {
 }
 
 //---------------------------------------------------------------------------
-void DisplayError(const char *szFunction, char *szError) {
+void DisplayError(const char *szFunction, const char *szError) {
   char szMessage[256];
 
-  sprintf_s(szMessage, 256, "Error in function %s : %s",
+  sprintf_s_2(szMessage, 256, "Error in function %s : %s",
 											(LPCSTR) szFunction, szError);
 	if (WS_OnError) {
 		WS_OnError(szMessage);

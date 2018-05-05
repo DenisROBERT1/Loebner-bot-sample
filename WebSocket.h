@@ -15,10 +15,20 @@ enum OPCODE {
 	oc_control = 0x0B
 };
 
-typedef void (CALLBACK *WS_ONERROR)(char *);
-typedef void (CALLBACK *WS_ONDISCONNECT)(char *);
-typedef void (CALLBACK *WS_ONMESSAGE)(char *);
+typedef void (CALLBACK *WS_ONERROR)(const char *);
+typedef void (CALLBACK *WS_ONDISCONNECT)(const char *);
+typedef void (CALLBACK *WS_ONMESSAGE)(const char *);
 
+
+#ifdef __GNUG__
+#define strcpy_s(strDest, size, strSrc) strcpy(strDest, strSrc)
+#define strcat_s(strDest, size, strSrc) strcat(strDest, strSrc)
+#define strncpy_s(strDest, size, strSrc, len) strncpy(strDest, strSrc, len)
+#define sprintf_s(strDest, size, strFormat, arg) sprintf(strDest, strFormat, arg)
+#define sprintf_s_2(strDest, size, strFormat, arg1, arg2) sprintf(strDest, strFormat, arg1, arg2)
+#else
+#define sprintf_s_2 sprintf_s
+#endif // __GNUG__
 
 //-----------------------FUNCTIONS PROTOTYPES--------------------------
 bool WebSocket_Initialisation(WS_ONERROR OnError, WS_ONDISCONNECT OnDisconnect, WS_ONMESSAGE OnMessage);
