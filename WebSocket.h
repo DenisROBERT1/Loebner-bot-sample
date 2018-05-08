@@ -20,15 +20,15 @@ typedef void (CALLBACK *WS_ONDISCONNECT)(const char *);
 typedef void (CALLBACK *WS_ONMESSAGE)(const char *);
 
 
-#ifdef __GNUG__
+#ifdef _MSC_VER
+#define sprintf_s_2 sprintf_s
+#else
 #define strcpy_s(strDest, size, strSrc) strcpy(strDest, strSrc)
 #define strcat_s(strDest, size, strSrc) strcat(strDest, strSrc)
 #define strncpy_s(strDest, size, strSrc, len) strncpy(strDest, strSrc, len)
 #define sprintf_s(strDest, size, strFormat, arg) sprintf(strDest, strFormat, arg)
 #define sprintf_s_2(strDest, size, strFormat, arg1, arg2) sprintf(strDest, strFormat, arg1, arg2)
-#else
-#define sprintf_s_2 sprintf_s
-#endif // __GNUG__
+#endif // _MSC_VER
 
 //-----------------------FUNCTIONS PROTOTYPES--------------------------
 bool WebSocket_Initialisation(WS_ONERROR OnError, WS_ONDISCONNECT OnDisconnect, WS_ONMESSAGE OnMessage);
