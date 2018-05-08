@@ -48,6 +48,8 @@ char *JSON_getvalue(JSON_VALUE &JSON_Value, int Index);
 void JSON_release(JSON_VALUE &JSON_Value);
 int EscapeString(const char *szIn, char *szOut, int SizeOut);
 int UnescapeString(const char *szIn, char *szOut, int SizeOut);
+bool Utf8ToAnsi(const char *szSrc, char *szDest);
+bool AnsiToUtf8(const char *szSrc, char *szDest);
 
 void CALLBACK Loebner_OnError(const char *szErrorMsg);
 void CALLBACK Loebner_OnDisconnect(const char *szReason);
@@ -79,6 +81,10 @@ bool Loebner_Initialisation(HWND hWnd,
 // ----------------------------------------------------------------------------
 bool Loebner_End() {
 
+	if (NewRound) {
+		OnEndRound();
+		NewRound = false;
+	}
 	return WebSocket_End();
 }
 
@@ -184,12 +190,16 @@ void CALLBACK Loebner_OnMessage(const char *szMessage) {
 	char *szPartners;
 	char *szBotPartner;
 	char *szContent;
+	char *szBufAnsi;
 
 
 	if (strlen(szMessage) < 4) return;
 	if (memcmp(szMessage, "42", 2)) return;
 
-	Data = JSON_parse(&szMessage[2]);
+	szBufAnsi = new char[strlen(szMessage) + 1];
+	Utf8ToAnsi(szMessage, szBufAnsi);
+
+	Data = JSON_parse(&szBufAnsi[2]);
 	szValue1 = JSON_getvalue(Data, 0);
 
 	if (szValue1 != NULL) {
@@ -301,17 +311,23 @@ void CALLBACK Loebner_OnMessage(const char *szMessage) {
 	}
 
 	JSON_release(Data);
+	delete[] szBufAnsi;
 }
 
 //---------------------------------------------------------------------------
 void Loebner_Emit(const char *szJSON) {
+	char *szBufUtf8;
 	char *szBufEmit;
 
 
-	szBufEmit = new char[strlen(szJSON) + 2 + 1];  // size of (42) + ending sero
-	wsprintf(szBufEmit, "42%s", szJSON);
+	szBufUtf8 = new char[strlen(szJSON) * 4 + 1];  // Four characters UTF8 for one ASCII
+	AnsiToUtf8(szJSON, szBufUtf8);
+
+	szBufEmit = new char[strlen(szBufUtf8) + 2 + 1];  // size of (42) + ending sero
+	wsprintf(szBufEmit, "42%s", szBufUtf8);
 	WebSocket_Send(oc_text, szBufEmit);
 	delete[] szBufEmit;
+	delete[] szBufUtf8;
 
 }
 
@@ -530,5 +546,71 @@ int UnescapeString(const char *szIn, char *szOut, int SizeOut) {
 	return j;
 }
 
+// ----------------------------------------------------------------------------
+bool Utf8ToAnsi(const char *szSrc, char *szDest) {
+	unsigned int b, bh = 0;
+	int NbBytes = 0;
+	int i, j;
+
+	for (i = 0, j = 0; i < (int) strlen(szSrc); i++) {
+		b = szSrc[i];
+		if (NbBytes > 0) {
+			bh = (bh << 6) | (b & 0x3F);
+			if (--NbBytes == 0) szDest[j++] = (char) bh;
+		}
+		else if ((b & 0xE0) == 0xC0) {
+			bh = b & 0x1F;
+			NbBytes = 1;
+		}
+		else if ((b & 0xF0) == 0xE0) {
+			bh = b & 0x0F;
+			NbBytes = 2;
+		}
+		else if ((b & 0xF8) == 0xF0) {
+			bh = b & 0x07;
+			NbBytes = 3;
+		}
+		else {
+			szDest[j++] = (char) b;
+		}
+	}
+
+	szDest[j++] = '\0';
+
+  return true;
+}
+
+// ----------------------------------------------------------------------------
+bool AnsiToUtf8(const char *szSrc, char *szDest) {
+  unsigned int b;
+  int i, j;
+
+  for (i = 0, j = 0; i < (int) strlen(szSrc); i++) {
+		b = (BYTE) szSrc[i];
+
+		if (b < 0x80) {
+			szDest[j++] = (char) b;
+		}
+		else if (b < 0x800) {
+			szDest[j++] = (char) (((b >> 6) & 0x1F) | 0xC0);
+			szDest[j++] = (char) ((b & 0x3F) | 0x80);
+		}
+		else if (b < 0x10000) {
+			szDest[j++] = (char) (((b >> 12) & 0x0F) | 0xE0);
+			szDest[j++] = (char) (((b >> 6) & 0x3F) | 0x80);
+			szDest[j++] = (char) ((b & 0x3F) | 0x80);
+		}
+		else {
+			szDest[j++] = (char) (((b >> 18) & 0x07) | 0xF0);
+			szDest[j++] = (char) (((b >> 12) & 0x3F) | 0x80);
+			szDest[j++] = (char) (((b >> 6) & 0x3F) | 0x80);
+			szDest[j++] = (char) ((b & 0x3F) | 0x80);
+		}
+  }
+
+	szDest[j++] = '\0';
+
+  return true;
+}
 
 // ----------------------------------------------------------------------------
