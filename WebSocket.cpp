@@ -655,8 +655,8 @@ bool SockIOResponse(char *szFrame) {
 			Reason *= 256;
 			Reason += (BYTE) ApplicationData[i];
 		}
-		WS_OnDisconnect(CloseReason(Reason));
 		WebSocket_Disconnect();
+		WS_OnDisconnect(CloseReason(Reason));
 	}
 	else if (OpCode == oc_text) {
 		if (bConnected) {
@@ -746,13 +746,13 @@ bool SockIODecode(const char *szFrame, OPCODE *OpCode, bool *Fin, bool *RSV1, bo
 		*Len = 0;
 		for (j = 0; j < 2; j++) {
 			(*Len) *= 256;
-			(*Len) += szFrame[i++];
+			(*Len) += (BYTE) szFrame[i++];
 		}
 	}
 	else if (*Len == 127)  {
 		for (j = 0; j < 8; j++) {
 			(*Len) *= 256;
-			(*Len) += szFrame[i++];
+			(*Len) += (BYTE) szFrame[i++];
 		}
 	}
 
@@ -1098,6 +1098,7 @@ LRESULT FAR PASCAL WndSocketProc(HWND Handle,
       SocketDistant = (SOCKET) wParam;
 			closesocket(SocketDistant);
 			SocketDistant = INVALID_SOCKET;
+			bConnected = false;
 			OnDisconnect();
       break;
     case FD_READ:

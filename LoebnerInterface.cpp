@@ -27,6 +27,7 @@ char szBotId[MAX_LEN_NAME];
 char szBotSecret[MAX_LEN_NAME];
 char szPartner[MAX_LEN_NAME];
 
+bool NewRound;
 bool RoundStarted;
 
 typedef struct {
@@ -69,6 +70,7 @@ bool Loebner_Initialisation(HWND hWnd,
 	Li_OnMessage = OnMessage;
 	Li_OnDisconnect = OnDisconnect;
 
+	NewRound = false;
 	RoundStarted = false;
 
 	return WebSocket_Initialisation(Loebner_OnError, Loebner_OnDisconnect, Loebner_OnMessage);
@@ -130,7 +132,7 @@ bool Loebner_Status() {
 	char *szJSONMessage;
 	char *szJSONFrame;
 
-	szJSONMessage = JSON_stringify(json_map, "status", "roundStatus", "id", szBotId, "secret", szBotSecret, NULL);
+	szJSONMessage = JSON_stringify(json_map, "status", "roundInformation", "id", szBotId, "secret", szBotSecret, NULL);
 	szJSONFrame = JSON_stringify(json_list, "control", szJSONMessage, NULL);
 
 	Loebner_Emit(szJSONFrame);
@@ -206,14 +208,23 @@ void CALLBACK Loebner_OnMessage(const char *szMessage) {
 								Partner = JSON_parse(szBotPartner);
 								lstrcpyn(szPartner, JSON_getvalue(Partner, 0), MAX_LEN_NAME);
 							}
+							JSON_release(Partners);
 						}
 						if (Li_OnNewRound != NULL) Li_OnNewRound();
+						NewRound = true;
 					}
 					else if (!strcmp(szStatus, "startRound")) {
-						RoundStarted = true;
-						if (Li_OnStartRound != NULL) Li_OnStartRound();
+						if (!NewRound) {
+							if (Li_OnNewRound != NULL) Li_OnNewRound();
+							NewRound = true;
+						}
+						if (!RoundStarted) {
+							if (Li_OnStartRound != NULL) Li_OnStartRound();
+							RoundStarted = true;
+						}
 					}
 					else if (!strcmp(szStatus, "endRound")) {
+						NewRound = false;
 						RoundStarted = false;
 						if (Li_OnEndRound != NULL) Li_OnEndRound();
 					}
@@ -230,6 +241,54 @@ void CALLBACK Loebner_OnMessage(const char *szMessage) {
 				if (szContent != NULL) {
 					if (Li_OnMessage != NULL) Li_OnMessage(szContent);
 				}
+				JSON_release(Msg);
+			}
+		}
+
+		else if (!strcmp(szValue1, "roundInformation")) {
+			//handle round information - if the round is running already then set flag RoundStarted to true.
+			szValue2 = JSON_getvalue(Data, 1);
+			if (szValue2 != NULL) {
+				Msg = JSON_parse(szValue2);
+
+				// Partner
+				szPartners = JSON_getvalue(Msg, "partners");
+				if (szPartners != NULL) {
+					Partners = JSON_parse(szPartners);
+					szBotPartner = JSON_getvalue(Partners, szBotId);
+					if (szBotPartner != NULL) {
+						Partner = JSON_parse(szBotPartner);
+						lstrcpyn(szPartner, JSON_getvalue(Partner, 0), MAX_LEN_NAME);
+					}
+					JSON_release(Partners);
+				}
+
+				// Status
+				szStatus = JSON_getvalue(Msg, "status");
+				if (szStatus != NULL) {
+					if (!strcmp(szStatus, "Not Started")) {
+						if (Li_OnNewRound != NULL) Li_OnNewRound();
+						NewRound = true;
+					}
+					else if (!strcmp(szStatus, "Running")) {
+						if (!NewRound) {
+							if (Li_OnNewRound != NULL) Li_OnNewRound();
+							NewRound = true;
+						}
+						if (!RoundStarted) {
+							if (Li_OnStartRound != NULL) Li_OnStartRound();
+							RoundStarted = true;
+						}
+					}
+					else if (!strcmp(szStatus, "Finished")) {
+						if (RoundStarted) {
+							NewRound = false;
+							RoundStarted = false;
+							if (Li_OnEndRound != NULL) Li_OnEndRound();
+						}
+					}
+				}
+
 				JSON_release(Msg);
 			}
 		}

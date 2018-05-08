@@ -107,16 +107,19 @@ INT_PTR CALLBACK MainForm(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 //---------------------------------------------------------------------------
 void CALLBACK OnNewRound(void) {
+	SetDlgItemText(hWndTop, IDC_STATUS, "New round about to begin");
 	// TODO 3 : Start automatically your bot
 	MessageBox(hWndTop, "New round about to begin\nPlease start the bot.", "New round", MB_OK | MB_ICONINFORMATION);
 }
 
 //---------------------------------------------------------------------------
 void CALLBACK OnStartRound(void) {
+	SetDlgItemText(hWndTop, IDC_STATUS, "Round has started");
 }
 
 //---------------------------------------------------------------------------
 void CALLBACK OnEndRound(void) {
+	SetDlgItemText(hWndTop, IDC_STATUS, "Round has ended");
 	// TODO 4 : Stop automatically your bot
 	MessageBox(hWndTop, "Round has ended\nPlease stop the bot.", "End round", MB_OK | MB_ICONINFORMATION);
 }
@@ -134,6 +137,7 @@ void CALLBACK OnMessage(const char *szMessage) {
 
 //---------------------------------------------------------------------------
 void CALLBACK OnDisconnect(const char *szReason) {
+	SetDlgItemText(hWndTop, IDC_STATUS, "Not connected");
 	EnableWindow(GetDlgItem(hWndTop, IDC_NAME), TRUE);
 	EnableWindow(GetDlgItem(hWndTop, IDC_SECRET), TRUE);
 	EnableWindow(GetDlgItem(hWndTop, IDC_IP), TRUE);
