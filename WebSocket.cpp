@@ -34,8 +34,13 @@
 #define PROTOCOL_HTTP		1
 #define PROTOCOL_SOCKIO	2
 
+// Set this variable to trace exchanges between server and program
+// #define TRACE 1
+
 // Traces
+#ifdef TRACE
 char szLogFile[MAX_PATH];
+#endif  // TRACE
 
 // Cryptographics datas
 HCRYPTPROV hCryptProv = (HCRYPTPROV) NULL;
@@ -135,7 +140,9 @@ bool WebSocket_Initialisation(WS_ONERROR OnError, WS_ONDISCONNECT OnDisconnect, 
 
 	// Log file
 	GetTempPath(MAX_PATH, szTempPath);
+#ifdef TRACE
 	GetTempFileName(szTempPath, _T("LOG"), 0, szLogFile);
+#endif  // TRACE
 
 	if (WSAStartup(MAKEWORD(1, 1), &WSAData)) {
 		WS_OnError("Cannot initialize WSAStartup");
@@ -795,6 +802,7 @@ int ReceiveBuf(void *Buf, int Count) {
 
 //---------------------------------------------------------------------------
 bool Trace(const void *Buf, int Count, bool bClient) {
+#ifdef TRACE
 	HANDLE hFile;
   DWORD NbOctets;
 	char szHexa[3];
@@ -839,6 +847,8 @@ bool Trace(const void *Buf, int Count, bool bClient) {
 		delete[] szFrame;
 	}
   CloseHandle(hFile);
+
+#endif  // TRACE
 
 	return true;
 }
