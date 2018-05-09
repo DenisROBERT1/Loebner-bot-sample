@@ -8,12 +8,14 @@
 #define IDC_TITLE1					103
 #define IDC_TITLE2					104
 #define IDC_STATUS					105
-#define IDC_NAME						106
-#define IDC_SECRET					107
-#define IDC_IP							108
-#define IDC_PORT						109
+#define IDC_IP							106
+#define IDC_PORT						107
+#define IDC_NAME						108
+#define IDC_SECRET					109
 #define IDC_START						110
 #define IDC_STOP						111
+#define IDC_MEMOJUDGE       112
+#define IDC_MEMOBOT         113
 #ifndef IDC_STATIC
 #define IDC_STATIC					-1
 #endif
