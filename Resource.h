@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by Loebner4Johnny.rc
+// Used by LoebnerBot.rc
 //
 
 #define IDD_MAINFORMBOX			101
