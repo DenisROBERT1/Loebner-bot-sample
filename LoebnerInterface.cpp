@@ -220,17 +220,17 @@ void CALLBACK Loebner_OnMessage(const char *szMessage) {
 							}
 							JSON_release(Partners);
 						}
-						if (Li_OnNewRound != NULL) Li_OnNewRound();
 						NewRound = true;
+						if (Li_OnNewRound != NULL) Li_OnNewRound();
 					}
 					else if (!strcmp(szStatus, "startRound")) {
 						if (!NewRound) {
-							if (Li_OnNewRound != NULL) Li_OnNewRound();
 							NewRound = true;
+							if (Li_OnNewRound != NULL) Li_OnNewRound();
 						}
 						if (!RoundStarted) {
-							if (Li_OnStartRound != NULL) Li_OnStartRound();
 							RoundStarted = true;
+							if (Li_OnStartRound != NULL) Li_OnStartRound();
 						}
 					}
 					else if (!strcmp(szStatus, "endRound")) {
@@ -277,17 +277,17 @@ void CALLBACK Loebner_OnMessage(const char *szMessage) {
 				szStatus = JSON_getvalue(Msg, "status");
 				if (szStatus != NULL) {
 					if (!strcmp(szStatus, "Not Started")) {
-						if (Li_OnNewRound != NULL) Li_OnNewRound();
 						NewRound = true;
+						if (Li_OnNewRound != NULL) Li_OnNewRound();
 					}
 					else if (!strcmp(szStatus, "Running")) {
 						if (!NewRound) {
-							if (Li_OnNewRound != NULL) Li_OnNewRound();
 							NewRound = true;
+							if (Li_OnNewRound != NULL) Li_OnNewRound();
 						}
 						if (!RoundStarted) {
-							if (Li_OnStartRound != NULL) Li_OnStartRound();
 							RoundStarted = true;
+							if (Li_OnStartRound != NULL) Li_OnStartRound();
 						}
 					}
 					else if (!strcmp(szStatus, "Finished")) {
