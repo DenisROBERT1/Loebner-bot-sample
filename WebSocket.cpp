@@ -1086,7 +1086,10 @@ LRESULT FAR PASCAL WndSocketProc(HWND Handle,
     return TRUE;
 
   case WM_TIMER:
-		if (bConnected)	WebSocket_Ping();
+		if (bConnected)	{
+			WebSocket_Ping();
+			SetThreadExecutionState(ES_SYSTEM_REQUIRED);  // Prevents the system from entering sleep
+		}
     return TRUE;
 
   case UM_MESSAGE:

@@ -3,7 +3,7 @@
 
 // Message socket
 #define UM_MESSAGE   (WM_USER + 10)
-#define DELAY_PING   30000
+#define DELAY_PING   10000
 
 enum OPCODE {
 	oc_continue = 0x00,
