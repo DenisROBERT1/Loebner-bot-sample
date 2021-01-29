@@ -28,7 +28,7 @@
 //---------------------------------------------------------------------------
 
 #define SIZE_RECVBUF 4096
-#define SIZE_SOCKETID 50
+#define SIZE_HOST 256
 
 #define PROTOCOL_NULL		0
 #define PROTOCOL_HTTP		1
@@ -54,10 +54,11 @@ SOCKET SocketDistant;
 HWND hWndSocket;
 int Port;
 char RecvBuf[SIZE_RECVBUF];
-char SocketID[SIZE_SOCKETID];
+char Host[SIZE_HOST];
 bool bEventRead;
 bool bEventConnect;
 bool bConnected;
+bool bClosed;
 
 const char *RequestGET = NULL;
 const char *RequestAccept = NULL;
@@ -133,6 +134,7 @@ bool WebSocket_Initialisation(WS_ONERROR OnError, WS_ONDISCONNECT OnDisconnect, 
   Socket = INVALID_SOCKET;
 	SocketDistant = INVALID_SOCKET;
 	bConnected = false;
+	bClosed = true;
 	HINSTANCE HInstance = NULL;
 	WS_OnError = OnError;
 	WS_OnDisconnect = OnDisconnect;
@@ -219,6 +221,8 @@ bool WebSocket_Connect(const char *szAddress, int Port) {
   Socket = INVALID_SOCKET;
 	SocketDistant = INVALID_SOCKET;
 
+	sprintf_s(Host, SIZE_HOST, "%s:%i", szAddress, Port);
+
   SockAddr4.sin_addr.S_un.S_addr = inet_addr(szAddress);
 
   Socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -259,12 +263,25 @@ bool WebSocket_Connect(const char *szAddress, int Port) {
 }
 
 // ----------------------------------------------------------------------------
+bool WebSocket_Close() {
+
+	if (!bClosed) {
+		WebSocket_Send(oc_text, "41");
+		WebSocket_Send(oc_close, "");
+		bClosed = true;
+	}
+
+	return true;
+}
+
+// ----------------------------------------------------------------------------
 bool WebSocket_Disconnect() {
 
 	if (Socket != INVALID_SOCKET) {
     closesocket(Socket);
     Socket = INVALID_SOCKET;
   }
+	bClosed = true;
 	bConnected = false;
 
 	return true;
@@ -324,7 +341,7 @@ bool WebSocket_Ping() {
 	}
 
 	if (strcmp(ApplicationData, "3")) {
-		WebSocket_Disconnect();
+		WebSocket_Close();
 		DisplayError(_T("OnConnect"), _T("Bad response to ping"));
 		return false;
 	}
@@ -334,7 +351,6 @@ bool WebSocket_Ping() {
 // ----------------------------------------------------------------------------
 bool OnConnect() {
 	DWORD pcbIn, pcbOut;
-	char szArgsGET[50];
 	char szGet[256];
 	BYTE szWebSocketKey[16];
 	char szWebSocketKeyBase64[61]; // 24 (Base64) + 36 (GUID) + 1
@@ -343,23 +359,6 @@ bool OnConnect() {
 	int i;
 	BOOL Ok;
 
-
-	Protocol = PROTOCOL_HTTP;
-	wsprintf(szArgsGET, "&transport=polling&t=%s", TimeStamp());
-	RequestGET = szArgsGET;
-	RequestAccept = "*/*";
-	RequestAccept_Language = "en-EN";
-	RequestAccept_Encoding = "gzip, deflate";
-	RequestUser_Agent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
-	RequestHost = "127.0.0.1:8080";
-	RequestDNT = "1";
-	RequestConnection = "Keep-Alive";
-	RequestCookie = "io=pTzblLqqYY3Vn6w5AAAm";
-	if (!HTTPRequest()) return false;
-
-	if (!memcmp(Cookies, "io=", 3)) {
-		lstrcpyn(SocketID, &Cookies[3], SIZE_SOCKETID);
-	}
 
 	for (i = 0; i < 16; i++) {
 		szWebSocketKey[i] = rand() * 256 / RAND_MAX;
@@ -371,11 +370,18 @@ bool OnConnect() {
 		return false;
 	}
 
-	sprintf_s(szGet, 256, "&transport=websocket&sid=%s", SocketID);
+	Protocol = PROTOCOL_HTTP;
+	sprintf_s(szGet, 256, "&transport=websocket");
 	RequestGET = szGet;
+	RequestAccept = "*/*";
 	RequestOrigin = "null";
+	RequestAccept_Language = "en-EN";
+	RequestAccept_Encoding = "gzip, deflate";
+	RequestUser_Agent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
+	RequestHost = Host;
+	RequestDNT = "1";
 	RequestSec_WebSocket_Key = szWebSocketKeyBase64;
-	RequestConnection = "Upgrade";
+	RequestConnection = "keep-alive, Upgrade";
 	RequestUpgrade = "Websocket";
 	RequestSec_WebSocket_Version = "13";
 	RequestCache_Control = "no-cache";
@@ -423,19 +429,18 @@ bool OnConnect() {
 
 	Protocol = PROTOCOL_SOCKIO;
 
-	WebSocket_Send(oc_text, "2probe");
+	WebSocket_Send(oc_text, "40");
 
 	if (!WebSocket_Receive()) {
 		DisplayError(_T("OnConnect"), _T("No response to ping"));
 		return false;
 	}
-	if (strcmp(ApplicationData, "3probe")) {
+	if (memcmp(ApplicationData, "40", 2)) {
 		DisplayError(_T("OnConnect"), _T("Bad response to ping"));
 		return false;
 	}
 
-	WebSocket_Send(oc_text, "5");
-
+	bClosed = false;
 	bConnected = true;
 
 	return true;
@@ -476,7 +481,7 @@ bool HTTPRequest() {
 	szFrame = new char[MaxLen];
 	i = 0;
 	if (RequestGET) {
-		sprintf_s(&szFrame[i], MaxLen - i, "GET /socket.io/?EIO=3%s HTTP/1.1\n", RequestGET);
+		sprintf_s(&szFrame[i], MaxLen - i, "GET /socket.io/?EIO=4%s HTTP/1.1\n", RequestGET);
 		i = strlen(szFrame);
 	}
 	if (RequestAccept) {
@@ -656,6 +661,9 @@ bool SockIOResponse(char *szFrame) {
 	if (OpCode == oc_ping) {
 		WebSocket_Send(oc_pong, ApplicationData);
 	}
+	else if (OpCode == oc_text && !strcmp(ApplicationData, "2")) {
+		WebSocket_Send(oc_text, "3");
+	}
 	else if (OpCode == oc_close) {
 		Reason = 0;
 		for (i = 0; i < Len; i++) {
@@ -663,7 +671,7 @@ bool SockIOResponse(char *szFrame) {
 			Reason += (BYTE) ApplicationData[i];
 		}
 		WebSocket_Disconnect();
-		WS_OnDisconnect(CloseReason(Reason));
+		if (!bClosed) WS_OnDisconnect(CloseReason(Reason));
 	}
 	else if (OpCode == oc_text) {
 		if (bConnected) {
@@ -1087,7 +1095,7 @@ LRESULT FAR PASCAL WndSocketProc(HWND Handle,
 
   case WM_TIMER:
 		if (bConnected)	{
-			WebSocket_Ping();
+			// WebSocket_Ping(); Not used with socket.io 3.1.0
 			SetThreadExecutionState(ES_SYSTEM_REQUIRED);  // Prevents the system from entering sleep
 		}
     return TRUE;
@@ -1111,8 +1119,11 @@ LRESULT FAR PASCAL WndSocketProc(HWND Handle,
       SocketDistant = (SOCKET) wParam;
 			closesocket(SocketDistant);
 			SocketDistant = INVALID_SOCKET;
-			bConnected = false;
-			OnDisconnect();
+			if (bConnected) {
+				bClosed = true;
+				bConnected = false;
+				OnDisconnect();
+			}
       break;
     case FD_READ:
       LastError = WSAGETSELECTERROR(lParam);

@@ -110,7 +110,7 @@ bool Loebner_Start(const char *szName, const char *szSecret, const char *szAddre
 // ----------------------------------------------------------------------------
 bool Loebner_Stop() {
 
-	if (!WebSocket_Disconnect()) return false;
+	if (!WebSocket_Close()) return false;
 
 	return true;
 }
@@ -305,7 +305,7 @@ void CALLBACK Loebner_OnMessage(const char *szMessage) {
 
 		else if (!strcmp(szValue1, "AuthError")) {
 			MessageBox(hWndTop, "Authentication error (name or secret incorrect)", "Web Socket Error", MB_OK | MB_ICONSTOP);
-			WebSocket_Disconnect();
+			WebSocket_Close();
 		}
 
 	}
@@ -323,7 +323,7 @@ void Loebner_Emit(const char *szJSON) {
 	szBufUtf8 = new char[strlen(szJSON) * 4 + 1];  // Four characters UTF8 for one ASCII
 	AnsiToUtf8(szJSON, szBufUtf8);
 
-	szBufEmit = new char[strlen(szBufUtf8) + 2 + 1];  // size of (42) + ending sero
+	szBufEmit = new char[strlen(szBufUtf8) + 2 + 1];  // size of (42) + ending zero
 	wsprintf(szBufEmit, "42%s", szBufUtf8);
 	WebSocket_Send(oc_text, szBufEmit);
 	delete[] szBufEmit;
